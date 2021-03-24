@@ -41,17 +41,23 @@ $json_pointer->pointer($pointer);
 
 $json_pointer->process();
 
+is ($document->{'seat'}->{'translate'}, 'translate ' . $document->{'seat'}->{'name'});
+is ($document->{'arr'}->[-1], 4);
+
 sub cb1 {
-    my ($val) = @_;
+    my ($val, $doc) = @_;
     is($val, 'Место 1');
+    $doc->{'translate'} = 'translate ' . $val;
 }
 
 sub cb2 {
-    my ($val) = @_;
+    my ($val, $doc) = @_;
     like($val, qr/price0|price1|price2/);
 }
 
 sub cb3 {
-    my ($val) = @_;
+    my ($val, $doc) = @_;
     like($val, qr/[123]/);
+    is(ref($doc), 'ARRAY');
+    push @$doc, 4;
 }

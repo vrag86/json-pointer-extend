@@ -33,21 +33,29 @@ sub process {
 sub _recursive_process {
     my ($self, $document, $pointer, $cb) = @_;
 
-    if (not $pointer) {
-        $cb->($document);
-    }
-    elsif ($pointer =~ /(.+?)\/\*(.+)?/) {
-        my $arr = JSON::Pointer->get($document, $1);
+    if ($pointer =~ /(.+?)\/\*(.+)?/) {
         my $tail = $2;
-        if (ref($arr) ne 'ARRAY') {
+        my $arr_ref = JSON::Pointer->get($document, $1);
+        if (ref($arr_ref) ne 'ARRAY') {
             Carp::croak("Path '$pointer' not array");
         }
-        for my $el (@$arr) {
-            $self->_recursive_process($el, $tail, $cb);
+
+        my @arr = @$arr_ref;
+        if ($tail) {
+            for my $el (@arr) {
+                $self->_recursive_process($el, $tail, $cb);
+            }
+        }
+        else {
+            my $root_pointer = $pointer =~ s/(.+)\/.+/$1/r;
+            for my $el (@arr) {
+                $cb->($el, JSON::Pointer->get($document, $root_pointer));
+            }
         }
     }
     else {
-        $cb->(JSON::Pointer->get($document, $pointer));
+        my $root_pointer = $pointer =~ s/(.+)\/.+/$1/r;
+        $cb->(JSON::Pointer->get($document, $pointer), JSON::Pointer->get($document, $root_pointer));
     }
 }
 
