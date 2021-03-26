@@ -41,12 +41,13 @@ $json_pointer->pointer($pointer);
 
 $json_pointer->process();
 
-is ($document->{'seat'}->{'translate'}, 'translate ' . $document->{'seat'}->{'name'});
-is ($document->{'arr'}->[-1], 4);
+is($document->{'seat'}->{'translate'}, 'translate ' . $document->{'seat'}->{'name'});
+is($document->{'arr'}->[-1], 4);
 
 sub cb1 {
-    my ($val, $doc) = @_;
+    my ($val, $doc, $field_name) = @_;
     is($val, 'Место 1');
+    is($field_name, 'name');
     $doc->{'translate'} = 'translate ' . $val;
 }
 

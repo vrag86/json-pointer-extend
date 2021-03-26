@@ -47,15 +47,15 @@ sub _recursive_process {
             }
         }
         else {
-            my $root_pointer = $pointer =~ s/(.+)\/.+/$1/r;
+            my ($root_pointer, $field_name) = $pointer =~ /(.+)\/(.+)/;
             for my $el (@arr) {
-                $cb->($el, JSON::Pointer->get($document, $root_pointer));
+                $cb->($el, JSON::Pointer->get($document, $root_pointer), $field_name);
             }
         }
     }
     else {
-        my $root_pointer = $pointer =~ s/(.+)\/.+/$1/r;
-        $cb->(JSON::Pointer->get($document, $pointer), JSON::Pointer->get($document, $root_pointer));
+        my ($root_pointer, $field_name) = $pointer =~ /(.+)?\/(.+)/;
+        $cb->(JSON::Pointer->get($document, $pointer), $root_pointer ? JSON::Pointer->get($document, $root_pointer) : $document, $field_name);
     }
 }
 
