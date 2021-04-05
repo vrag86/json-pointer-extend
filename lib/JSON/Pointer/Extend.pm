@@ -33,11 +33,12 @@ sub process {
 sub _recursive_process {
     my ($self, $document, $pointer, $cb) = @_;
 
-    if ($pointer =~ /(.+?)\/\*(.+)?/) {
+    if ($pointer =~ /(.*?)\/\*(.+)?/) {
+        my $path = $1;
         my $tail = $2;
-        my $arr_ref = JSON::Pointer->get($document, $1);
+        my $arr_ref = JSON::Pointer->get($document, $path);
         if (ref($arr_ref) ne 'ARRAY') {
-            Carp::croak("Path '$pointer' not array");
+            Carp::croak("Path '$path' not array");
         }
 
         my @arr = @$arr_ref;
@@ -47,10 +48,22 @@ sub _recursive_process {
             }
         }
         else {
-            my ($root_pointer, $field_name) = $pointer =~ /(.+)\/(.+)/;
+            my ($root_pointer, $field_name) = $pointer =~ /(.*)\/(.+)/;
             for my $el (@arr) {
                 $cb->($el, JSON::Pointer->get($document, $root_pointer), $field_name);
             }
+        }
+    }
+    elsif ($pointer eq '') {
+        my $path = '';
+        my $arr_ref = JSON::Pointer->get($document, $path);
+        if (ref($arr_ref) ne 'ARRAY') {
+            Carp::croak("Path '$path' not array");
+        }
+
+        my @arr = @$arr_ref;
+        for my $el (@arr) {
+            $cb->($el, $arr_ref, undef);
         }
     }
     else {
@@ -63,8 +76,9 @@ sub _recursive_process {
 
 sub document {
     if (scalar(@_) > 1) {
-        if (ref($_[1]) ne 'HASH') {
-            Carp::croak("'document' must be a hashref");
+        my $ref = ref($_[1]);
+        if ($ref ne 'HASH' && $ref ne 'ARRAY') {
+            Carp::croak("'document' must be a hashref or arrayref");
         }
         $_[0]->{'document'} = $_[1];
     }
@@ -132,11 +146,11 @@ C<JSON::Pointer::Extend> - Extend Perl implementation of JSON Pointer (RFC6901)
 
 =head1 METHODS
 
-=head2 document($document :HashRef) :HashRef
+=head2 document($document :HashRef|Arrayref) :HashRef|ArrayRef
 
 =over
 
-=item $document :HashRef - Target perl data structure that is able to be presented by JSON format.
+=item $document :HashRef|ArrayRef - Target perl data structure that is able to be presented by JSON format.
 
 Get/Set document value.
 
