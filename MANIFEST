@@ -1,0 +1,7 @@
+Makefile.PL
+MANIFEST
+README
+t/00_test.t 
+lib/JSON/Pointer/Extend.pm
+MYMETA.json
+MYMETA.yml
