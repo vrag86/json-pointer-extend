@@ -11,7 +11,7 @@ WriteMakefile(
                             },
     ABSTRACT_FROM       => 'lib/JSON/Pointer/Extend.pm',
     AUTHOR              => 'Pavel Andryushin <vrag867@gmail.com>',
-    LICENSE             => 'perl5',
+    LICENSE             => 'perl',
     MIN_PERL_VERSION    => 5.12.1,
     CONFIGURE_REQUIRES  => {
                                 'ExtUtils::MakeMaker' => 0,
